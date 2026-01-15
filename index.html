@@ -36,7 +36,7 @@
 
     <div class="controls">
         <button onclick="prevSentence()" style="background-color: #7f8c8d;">⬅️ Назад</button>
-        <button onclick="playSound()">🔊 Прослушать</button>
+        <button id="listenBtn" onclick="playSound()">🔊 Прослушать</button>
         <button onclick="nextSentence()" style="background-color: #27ae60;">Следующее ➡️</button>
         <br><br>
         <button onclick="setMode('assemble')">🧩 Собрать слова</button>
@@ -75,6 +75,7 @@
     const feedbackEl = document.getElementById('feedback');
     const stepEl = document.getElementById('currentStep');
     const totalEl = document.getElementById('totalSteps');
+    const listenBtnEl = document.getElementById('listenBtn');
 
     totalEl.innerText = story.length;
 
@@ -109,6 +110,24 @@
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-GB'; // Британский английский (как в учебнике)
         utterance.rate = 0.8; // Чуть медленнее для обучения
+        
+        // Блокировка кнопки
+        listenBtnEl.disabled = true;
+        listenBtnEl.style.opacity = "0.5";
+        listenBtnEl.style.cursor = "not-allowed";
+
+        utterance.onend = () => {
+            listenBtnEl.disabled = false;
+            listenBtnEl.style.opacity = "1";
+            listenBtnEl.style.cursor = "pointer";
+        };
+
+        utterance.onerror = () => {
+            listenBtnEl.disabled = false;
+            listenBtnEl.style.opacity = "1";
+            listenBtnEl.style.cursor = "pointer";
+        };
+
         speechSynthesis.speak(utterance);
     }
 
