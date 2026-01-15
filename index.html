@@ -23,7 +23,6 @@
         }
 
         body {
-            /* Added Noto Color Emoji for Android support */
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif;
             background-color: var(--bg-teal);
             background-image: radial-gradient(#ffffff 15%, transparent 16%);
@@ -121,7 +120,7 @@
             top: 0;
             margin: 4px;
             font-family: inherit;
-            touch-action: manipulation; 
+            touch-action: manipulation;
         }
 
         .btn-3d:active {
@@ -217,29 +216,44 @@
 
         /* DEBUG CONSOLE */
         #debugConsole {
-            display: block; /* Visible for debugging */
+            display: none; /* Hidden by default */
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 80px;
-            background: rgba(0,0,0,0.8);
+            height: 120px;
+            background: rgba(0,0,0,0.9);
             color: #0f0;
             font-family: monospace;
-            font-size: 10px;
+            font-size: 11px;
             overflow-y: scroll;
-            z-index: 9999;
-            padding: 5px;
+            z-index: 9998;
+            padding: 10px;
             box-sizing: border-box;
             text-align: left;
-            pointer-events: none; /* Let clicks pass through */
+        }
+
+        /* Debug Toggle Button */
+        #debugToggle {
+            position: fixed;
+            top: 5px;
+            left: 5px;
+            z-index: 9999;
+            background: rgba(0,0,0,0.2);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px;
+            font-size: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
 <!-- On-screen console -->
-<div id="debugConsole">Waiting for logs...</div>
+<button id="debugToggle" onclick="toggleDebug()">🪲</button>
+<div id="debugConsole"></div>
 
 <div class="main-container">
     <h1>
@@ -311,11 +325,19 @@
         console.log(msg);
     }
     
+    function toggleDebug() {
+        if (debugConsole.style.display === 'none') {
+            debugConsole.style.display = 'block';
+        } else {
+            debugConsole.style.display = 'none';
+        }
+    }
+    
     window.onerror = function(msg, url, line) {
         log("ERR: " + msg + " (L:" + line + ")");
     };
 
-    log("Starting app...");
+    log("App starting...");
 
     const defaultStory = [
         "Ivanushka feels very frightened.",
@@ -358,7 +380,7 @@
     let voices = [];
     function initVoices() {
         if (!window.speechSynthesis) {
-            log("Speech API missing");
+            log("Speech API missing (expected on some Androids)");
             return;
         }
         voices = window.speechSynthesis.getVoices();
@@ -374,7 +396,7 @@
         log("Audio Setup Error: " + e.message);
     }
 
-    // --- Safe Storage (CRITICAL FOR ANDROID) ---
+    // --- Safe Storage ---
     function safeGetItem(key) {
         try {
             return localStorage.getItem(key);
@@ -556,7 +578,7 @@
     function renderFullText() {
         fullTextContainer.innerHTML = story.map((sent, idx) => {
             const isActive = idx === currentIndex ? 'active' : '';
-            const safeSent = sent.replace(/'/g, "\'" );
+            const safeSent = sent.replace(/'/g, "' ");
             return `<span class="text-sentence ${isActive}" onclick="jumpTo(${idx})">${sent}</span>`;
         }).join(' ');
     }
@@ -588,29 +610,62 @@
         }
     }
 
+    // --- ENHANCED PLAY SOUND WITH FALLBACK ---
     function playSound() {
-        if (!window.speechSynthesis) {
-            showAlert("Ваш браузер не поддерживает озвучку");
-            return;
-        }
-        speechSynthesis.cancel();
         const text = story[currentIndex];
-        const utterance = new SpeechSynthesisUtterance(text);
         
-        const enVoice = voices.find(v => v.lang.startsWith('en-GB')) || 
-                        voices.find(v => v.lang.startsWith('en-US'));
-        if (enVoice) utterance.voice = enVoice;
+        // 1. Try Native Speech
+        if (window.speechSynthesis && voices.length > 0) {
+            log("Trying native speech...");
+            speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const enVoice = voices.find(v => v.lang.startsWith('en-GB')) || 
+                            voices.find(v => v.lang.startsWith('en-US'));
+            if (enVoice) utterance.voice = enVoice;
+            
+            utterance.lang = 'en-GB';
+            utterance.rate = 0.8;
+            listenBtnEl.classList.add('active');
+            utterance.onend = () => listenBtnEl.classList.remove('active');
+            utterance.onerror = (e) => {
+                listenBtnEl.classList.remove('active');
+                log("Native Err: " + e.error + ". Trying fallback...");
+                playNetworkTTS(text); // Fallback if native errors out
+            };
+            
+            speechSynthesis.speak(utterance);
+        } else {
+            log("Native speech missing. Using Network TTS.");
+            playNetworkTTS(text);
+        }
+    }
+
+    function playNetworkTTS(text) {
+        // 2. Google Translate TTS Hack (Client-side)
+        // Note: This relies on Google's public API remaining open for 'tw-ob' client
+        const url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(text);
         
-        utterance.lang = 'en-GB';
-        utterance.rate = 0.8;
+        const audio = new Audio(url);
+        
         listenBtnEl.classList.add('active');
-        utterance.onend = () => listenBtnEl.classList.remove('active');
-        utterance.onerror = (e) => {
+        log("Loading audio from URL...");
+        
+        audio.onended = () => {
             listenBtnEl.classList.remove('active');
-            log("Speech Err: " + e.error);
+            log("Audio finished.");
         };
         
-        speechSynthesis.speak(utterance);
+        audio.onerror = (e) => {
+            listenBtnEl.classList.remove('active');
+            log("Network Audio Failed: " + (e.target.error ? e.target.error.code : 'unknown'));
+            showAlert("Не удалось воспроизвести звук. Проверьте интернет.");
+        };
+        
+        audio.play().catch(e => {
+             log("Play blocked: " + e.message);
+             showAlert("Нажмите еще раз, чтобы разрешить звук.");
+        });
     }
 
     function loadSentence() {
