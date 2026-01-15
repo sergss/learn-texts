@@ -3,78 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sivka-Burka Trainer</title>
+    <title>Easy English</title>
     <style>
-        body { font-family: 'Comic Sans MS', sans-serif; background-color: #f0f8ff; padding: 20px; text-align: center; }
-        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
-        h1 { color: #2c3e50; }
-        .sentence-display { font-size: 1.5em; color: #333; margin: 20px 0; min-height: 60px; line-height: 1.4; }
-        button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 10px; cursor: pointer; margin: 5px; transition: 0.2s; }
-        button:hover { background-color: #2980b9; }
-        button.word-btn { background-color: #e67e22; margin: 5px; }
-        button.word-btn:disabled { background-color: #bdc3c7; cursor: default; }
-        .controls { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
-        .feedback { font-weight: bold; font-size: 1.2em; margin-top: 10px; height: 30px; }
-        .correct { color: #27ae60; }
-        .wrong { color: #c0392b; }
-        .progress { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px; }
+        :root {
+            --bg-teal: #48C9B0;
+            --card-bg: #FFFFFF;
+            --btn-blue: #3498DB;
+            --btn-blue-shadow: #2980B9;
+            --btn-red: #E74C3C;
+            --btn-red-shadow: #C0392B;
+            --btn-yellow: #F1C40F;
+            --btn-yellow-shadow: #F39C12;
+            --btn-green: #2ECC71;
+            --btn-green-shadow: #27AE60;
+            --btn-purple: #9B59B6;
+            --btn-purple-shadow: #8E44AD;
+            --text-color: #2C3E50;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: var(--bg-teal);
+            background-image: linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            padding: 20px;
+            text-align: center;
+            color: var(--text-color);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .main-container {
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Decorative Header */
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0px #eee;
+        }
         
-        /* Styles for Full Text View */
-        .full-text-area { text-align: left; background: #fff; border: 2px dashed #bdc3c7; padding: 15px; margin: 20px 0; border-radius: 10px; max-height: 200px; overflow-y: auto; display: none; }
-        .text-sentence { cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: background 0.2s; display: inline; margin-right: 4px; }
-        .text-sentence:hover { background-color: #eaf2f8; }
-        .text-sentence.active { background-color: #f1c40f; color: #fff; font-weight: bold; }
+        .title-word span { display: inline-block; transform: rotate(-5deg); }
+        .title-word span:nth-child(even) { transform: rotate(5deg); }
         
-        .admin-controls { margin-top: 15px; font-size: 0.8rem; }
-        .btn-small { padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; }
-        .btn-danger { background-color: #e74c3c; }
-        .btn-danger:hover { background-color: #c0392b; }
-        .btn-warning { background-color: #f39c12; }
-        .btn-warning:hover { background-color: #d35400; }
+        .color-e { color: var(--btn-blue); }
+        .color-a { color: var(--btn-red); }
+        .color-s { color: var(--btn-yellow); }
+        .color-y { color: var(--btn-green); }
+
+        /* Navigation Bar */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ECF0F1;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-indicator {
+            font-weight: bold;
+            color: #7F8C8D;
+            font-size: 1.1rem;
+        }
+
+        /* Canvas Area */
+        .scene-container {
+            border: 4px solid #BDC3C7;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        /* Text Display Area */
+        .game-area {
+            min-height: 80px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sentence-display {
+            font-size: 1.6em;
+            color: #2C3E50;
+            line-height: 1.4;
+            padding: 10px;
+        }
+
+        /* 3D Buttons */
+        .btn-3d {
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+            top: 0;
+            margin: 5px;
+            font-family: inherit;
+        }
+
+        .btn-3d:active {
+            top: 4px;
+            box-shadow: 0 0 0 !important;
+        }
+
+        /* Button Variants */
+        .btn-blue { background-color: var(--btn-blue); box-shadow: 0 5px 0 var(--btn-blue-shadow); }
+        .btn-red { background-color: var(--btn-red); box-shadow: 0 5px 0 var(--btn-red-shadow); }
+        .btn-yellow { background-color: var(--btn-yellow); box-shadow: 0 5px 0 var(--btn-yellow-shadow); color: #5D4037; }
+        .btn-green { background-color: var(--btn-green); box-shadow: 0 5px 0 var(--btn-green-shadow); }
+        .btn-purple { background-color: var(--btn-purple); box-shadow: 0 5px 0 var(--btn-purple-shadow); }
+        .btn-gray { background-color: #95A5A6; box-shadow: 0 5px 0 #7F8C8D; }
+        
+        .btn-nav { font-size: 1.2rem; padding: 8px 15px; border-radius: 50%; width: 50px; height: 50px; display: inline-flex; justify-content: center; align-items: center; }
+
+        /* Modes Grid */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            background: #F4F6F7;
+            padding: 15px;
+            border-radius: 15px;
+        }
+        
+        /* Word Bank (Assemble Mode) */
+        #wordBank {
+            margin-top: 15px;
+            min-height: 40px;
+        }
+
+        /* Feedback */
+        .feedback {
+            font-weight: bold;
+            font-size: 1.2em;
+            height: 30px;
+            margin: 10px 0;
+        }
+        .correct { color: var(--btn-green); }
+        .wrong { color: var(--btn-red); }
+
+        /* Full Text Drawer */
+        .full-text-drawer {
+            margin-top: 30px;
+            border-top: 2px dashed #BDC3C7;
+            padding-top: 15px;
+        }
+        .full-text-content {
+            text-align: left;
+            background: #ECF0F1;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            font-size: 0.9rem;
+        }
+        .text-sentence { cursor: pointer; padding: 2px 5px; border-radius: 4px; }
+        .text-sentence:hover { background-color: #D5DBDB; }
+        .text-sentence.active { background-color: var(--btn-yellow); color: #fff; font-weight: bold; }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .modal-message {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #2C3E50;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Utilities */
+        .w-100 { width: 100%; box-sizing: border-box; }
+        .icon { margin-right: 5px; }
+
+        /* Mobile tweaks */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .modes-grid { grid-template-columns: 1fr 1fr; }
+            .btn-3d { font-size: 0.9rem; padding: 10px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h1>🐴 Sivka-Burka</h1>
-    <div class="progress">Предложение <span id="currentStep">1</span> из <span id="totalSteps">12</span></div>
-    
-    <!-- Canvas Area -->
-    <canvas id="sceneCanvas" width="600" height="300" style="background: white; border: 2px solid #333; border-radius: 10px; margin: 20px auto; display: block;"></canvas>
+<div class="main-container">
+    <h1>
+        <span class="title-word">
+            <span class="color-e">E</span><span class="color-a">A</span><span class="color-s">S</span><span class="color-y">Y</span>
+        </span> 
+        <span class="title-word">
+            <span class="color-e">E</span><span class="color-y">N</span><span class="color-s">G</span><span class="color-a">L</span><span class="color-e">I</span><span class="color-s">S</span><span class="color-y">H</span>
+        </span>
+    </h1>
 
-    <div id="gameArea">
+    <div class="nav-bar">
+        <button class="btn-3d btn-gray btn-nav" onclick="prevSentence()">⬅️</button>
+        <div class="progress-indicator">Карточка <span id="currentStep">1</span> / <span id="totalSteps">12</span></div>
+        <button class="btn-3d btn-green btn-nav" onclick="nextSentence()">➡️</button>
+    </div>
+
+    <div class="scene-container">
+        <canvas id="sceneCanvas" width="600" height="250"></canvas>
+    </div>
+
+    <div class="game-area">
         <div id="targetText" class="sentence-display" style="display:none;"></div>
-        <div id="playerArea" class="sentence-display">Нажми "Старт"</div>
+        <div id="playerArea" class="sentence-display">Нажми "Слушать" или выбери режим</div>
+        <div class="feedback" id="feedback"></div>
         <div id="wordBank"></div>
     </div>
 
-    <div class="feedback" id="feedback"></div>
+    <!-- Primary Action -->
+    <button id="listenBtn" onclick="playSound()" class="btn-3d btn-blue w-100" style="font-size: 1.2rem; margin: 0 0 15px 0;">
+        🔊 СЛУШАТЬ
+    </button>
 
-    <div class="controls">
-        <button onclick="prevSentence()" style="background-color: #7f8c8d;">⬅️ Назад</button>
-        <button id="listenBtn" onclick="playSound()">🔊 Прослушать</button>
-        <button onclick="nextSentence()" style="background-color: #27ae60;">Следующее ➡️</button>
-        <br><br>
-        <button onclick="setMode('assemble')">🧩 Собрать слова</button>
-        <button onclick="setMode('gaps')">📝 Вставить пропуски</button>
-        <button onclick="setMode('reveal')">👁️ По слову</button>
-        <button onclick="setMode('letter_by_letter')">🔤 По букве</button>
-        <button onclick="setMode('read')">📖 Просто читать</button>
-        
-        <div class="admin-controls">
-            <button onclick="deleteCurrentSentence()" class="btn-small btn-danger">❌ Удалить предложение</button>
-            <button onclick="resetStory()" class="btn-small btn-warning">↺ Сброс текста</button>
-        </div>
+    <!-- Mode Selectors -->
+    <div class="modes-grid">
+        <button onclick="setMode('read')" class="btn-3d btn-yellow">📖 Читать</button>
+        <button onclick="setMode('reveal')" class="btn-3d btn-purple">👁️ Слова</button>
+        <button onclick="setMode('letter_by_letter')" class="btn-3d btn-red">🔤 Буквы</button>
+        <button onclick="setMode('assemble')" class="btn-3d btn-green">🧩 Пазл</button>
+        <button onclick="setMode('gaps')" class="btn-3d btn-blue">📝 Пропуски</button>
     </div>
 
-    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-    
-    <button onclick="toggleFullText()" class="btn-small" style="background-color: #95a5a6; margin-bottom: 10px;">📜 Показать/Скрыть весь текст</button>
-    <div id="fullTextContainer" class="full-text-area"></div>
+    <!-- Bottom / Admin -->
+    <div class="full-text-drawer">
+        <button onclick="toggleFullText()" class="btn-3d btn-gray" style="font-size: 0.8rem; padding: 8px 15px;">📜 Показать весь текст</button>
+        <div class="admin-controls" style="display:inline-block; float: right;">
+            <button onclick="deleteCurrentSentence()" class="btn-3d btn-red" style="font-size: 0.8rem; padding: 8px 10px;">❌</button>
+            <button onclick="resetStory()" class="btn-3d btn-yellow" style="font-size: 0.8rem; padding: 8px 10px;">↺</button>
+        </div>
+        <div id="fullTextContainer" class="full-text-content" style="margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Custom Modal -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-card">
+        <div id="modalMessage" class="modal-message">Сообщение</div>
+        <div class="modal-buttons">
+            <button id="modalConfirmBtn" class="btn-3d btn-green">Да</button>
+            <button id="modalCancelBtn" class="btn-3d btn-red" onclick="closeModal()">Нет</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // Исходный текст (по умолчанию)
     const defaultStory = [
         "Ivanushka feels very frightened.",
         "He opens his mouth, ready to shout to his brothers.",
@@ -96,13 +323,12 @@
 
     let story = [];
     let currentIndex = 0;
-    let currentMode = 'read'; // read, assemble, gaps, reveal
-    let revealIndex = 0; // Для режима "по слову"
+    let currentMode = 'read'; 
+    let revealIndex = 0;
     let letterWordIndex = 0;
-    let letterState = 0; // 0: show 1st letter, 1: show full word
+    let letterState = 0; 
     const STORAGE_KEY = 'sivka_story_data_v1';
 
-    const targetTextEl = document.getElementById('targetText');
     const playerAreaEl = document.getElementById('playerArea');
     const wordBankEl = document.getElementById('wordBank');
     const feedbackEl = document.getElementById('feedback');
@@ -113,46 +339,73 @@
     const canvas = document.getElementById('sceneCanvas');
     const ctx = canvas.getContext('2d');
     
-    // "Разогрев" синтеза речи
-    let audioContextInitialized = false;
-
-    function warmUpAudio() {
-        if (!audioContextInitialized) {
-            window.speechSynthesis.getVoices();
-            const utterance = new SpeechSynthesisUtterance('');
-            utterance.volume = 0;
-            speechSynthesis.speak(utterance);
-            if (!speechSynthesis.pending && !speechSynthesis.speaking) {
-                // audioContextInitialized = true; // Опционально
-            }
+    // --- Audio Init Fix ---
+    let voices = [];
+    
+    function initVoices() {
+        voices = window.speechSynthesis.getVoices();
+        // Some browsers need a kickstart
+        if (voices.length === 0) {
+            setTimeout(initVoices, 100);
         }
     }
+    
+    initVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = initVoices;
+    }
 
-    // Попытка 1: Сразу при загрузке
-    warmUpAudio();
+    // Attempt to unlock audio on first interaction if needed
+    document.body.addEventListener('click', function unlockAudio() {
+        const u = new SpeechSynthesisUtterance(""); 
+        window.speechSynthesis.speak(u);
+        document.body.removeEventListener('click', unlockAudio);
+    }, { once: true });
 
-    // Попытка 2: При первом клике
-    document.addEventListener('click', function initAudio() {
-        if (!audioContextInitialized) {
-            warmUpAudio();
-            audioContextInitialized = true;
-            document.removeEventListener('click', initAudio);
-        }
-    });
+    // --- Modal Logic ---
+    const modal = document.getElementById('customModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+    const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+    function showConfirm(message, onYes) {
+        modalMessage.innerText = message;
+        modalConfirmBtn.onclick = () => {
+            onYes();
+            closeModal();
+        };
+        modalCancelBtn.style.display = 'inline-block';
+        modalConfirmBtn.innerText = 'Да';
+        modal.style.display = 'flex';
+    }
+
+    function showAlert(message) {
+        modalMessage.innerText = message;
+        modalConfirmBtn.onclick = closeModal;
+        modalConfirmBtn.innerText = 'ОК';
+        modalCancelBtn.style.display = 'none';
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    // --- App Logic ---
 
     function init() {
         loadFromStorage();
         if (story.length === 0) {
-            resetStory();
-        } else {
-            renderFullText();
-            loadSentence();
+            // Can't use custom modal here easily without blocking, 
+            // so we just restore silently or check length > 0 logic elsewhere.
+            // But let's just restore default if empty.
+            story = [...defaultStory];
+            saveToStorage();
         }
+        renderFullText();
+        loadSentence();
     }
-    
-    // --- Canvas "Раскраска" ---
-    
-    // Словарь объектов: слово -> эмодзи
+
     const keywords = {
         'ivanushka': '🧑', 'he': '🧑', 'boy': '🧑', 'brother': '👱', 'brothers': '👱👱',
         'horse': '🐎', 'sivka': '🐎', 'sivka-burka': '🐎',
@@ -170,18 +423,24 @@
     };
 
     function drawScene(text) {
-        // Очистка
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // 1. Рисуем "землю" (горизонт)
+        // Sky
+        ctx.fillStyle = '#EBF5FB';
+        ctx.fillRect(0,0, canvas.width, canvas.height);
+
+        // Ground
         ctx.beginPath();
-        ctx.moveTo(0, 250);
-        ctx.bezierCurveTo(200, 240, 400, 260, 600, 250);
-        ctx.strokeStyle = '#333';
+        ctx.moveTo(0, 200);
+        ctx.bezierCurveTo(200, 190, 400, 210, 600, 200);
+        ctx.lineTo(600, 250);
+        ctx.lineTo(0, 250);
+        ctx.fillStyle = '#2ECC71';
+        ctx.fill();
+        ctx.strokeStyle = '#27AE60';
         ctx.lineWidth = 2;
         ctx.stroke();
 
-        // 2. Ищем ключевые слова
         const lowerText = text.toLowerCase();
         let objectsToDraw = [];
 
@@ -192,31 +451,20 @@
         }
         
         objectsToDraw = [...new Set(objectsToDraw)];
-        
-        if (objectsToDraw.length === 0) {
-            objectsToDraw.push('❓');
-        }
+        if (objectsToDraw.length === 0) objectsToDraw.push('❓');
 
-        // 3. Рисуем объекты
         const step = canvas.width / (objectsToDraw.length + 1);
-        
-        ctx.font = "100px serif"; 
+        ctx.font = "80px serif"; 
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         
         objectsToDraw.forEach((emoji, index) => {
             const x = step * (index + 1);
-            let y = 250; 
-            
-            if (emoji === '☀️' || emoji === '🌙') {
-                y = 100;
-            }
-            
+            let y = 220; 
+            if (emoji === '☀️' || emoji === '🌙') y = 100;
             ctx.fillText(emoji, x, y);
         });
     }
-
-    // --- Управление данными ---
 
     function loadFromStorage() {
         const saved = localStorage.getItem(STORAGE_KEY);
@@ -232,49 +480,39 @@
     }
 
     function resetStory() {
-        if (confirm("Вы уверены, что хотите сбросить текст к исходному состоянию?")) {
+        showConfirm("Сбросить историю в начало?", () => {
             story = [...defaultStory];
             saveToStorage();
             currentIndex = 0;
             renderFullText();
             loadSentence();
-            feedbackEl.innerText = "Текст сброшен!";
-            feedbackEl.className = "feedback";
-        }
+            feedbackEl.innerText = "";
+        });
     }
 
     function deleteCurrentSentence() {
-        if (story.length <= 1) {
-            alert("Нельзя удалить последнее предложение!");
-            return;
-        }
-        if (confirm("Удалить текущее предложение?")) {
+        if (story.length <= 1) return;
+        showConfirm("Удалить это предложение?", () => {
             story.splice(currentIndex, 1);
             saveToStorage();
-            if (currentIndex >= story.length) {
-                currentIndex = story.length - 1;
-            }
+            if (currentIndex >= story.length) currentIndex = story.length - 1;
             renderFullText();
             loadSentence();
-            feedbackEl.innerText = "Предложение удалено";
-            feedbackEl.className = "feedback correct";
-        }
+        });
     }
 
-    // --- Интерфейс ---
-
     function toggleFullText() {
-        if (fullTextContainer.style.display === 'none' || fullTextContainer.style.display === '') {
-            fullTextContainer.style.display = 'block';
+        const el = document.getElementById('fullTextContainer');
+        if (el.style.display === 'none' || el.style.display === '') {
+            el.style.display = 'block';
         } else {
-            fullTextContainer.style.display = 'none';
+            el.style.display = 'none';
         }
     }
 
     function renderFullText() {
         fullTextContainer.innerHTML = story.map((sent, idx) => {
             const isActive = idx === currentIndex ? 'active' : '';
-            const safeSent = sent.replace(/'/g, "\\'"); 
             return `<span class="text-sentence ${isActive}" onclick="jumpTo(${idx})">${sent}</span>`;
         }).join(' ');
     }
@@ -301,35 +539,27 @@
             currentIndex++;
             loadSentence();
         } else {
-            feedbackEl.innerText = "Молодец! Текст пройден!";
+            feedbackEl.innerText = "Молодец! Конец истории!";
             feedbackEl.className = "feedback correct";
         }
     }
 
     function playSound() {
         speechSynthesis.cancel();
-
         const text = story[currentIndex];
         const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Try to pick a better English voice if available
+        const enVoice = voices.find(v => v.lang.startsWith('en-GB')) || 
+                        voices.find(v => v.lang.startsWith('en-US'));
+        if (enVoice) utterance.voice = enVoice;
+        
         utterance.lang = 'en-GB';
         utterance.rate = 0.8;
+        listenBtnEl.classList.add('active');
+        utterance.onend = () => listenBtnEl.classList.remove('active');
+        utterance.onerror = () => listenBtnEl.classList.remove('active');
         
-        listenBtnEl.disabled = true;
-        listenBtnEl.style.opacity = "0.5";
-        listenBtnEl.style.cursor = "not-allowed";
-
-        utterance.onend = () => {
-            listenBtnEl.disabled = false;
-            listenBtnEl.style.opacity = "1";
-            listenBtnEl.style.cursor = "pointer";
-        };
-
-        utterance.onerror = () => {
-            listenBtnEl.disabled = false;
-            listenBtnEl.style.opacity = "1";
-            listenBtnEl.style.cursor = "pointer";
-        };
-
         speechSynthesis.speak(utterance);
     }
 
@@ -344,7 +574,6 @@
 
         wordBankEl.innerHTML = '';
         playerAreaEl.innerHTML = '';
-        targetTextEl.style.display = 'none';
 
         if (currentMode === 'read') {
             playerAreaEl.innerText = text;
@@ -352,81 +581,74 @@
         else if (currentMode === 'assemble') {
             let words = text.split(' ');
             let shuffled = [...words].sort(() => Math.random() - 0.5);
-            
             shuffled.forEach(word => {
                 let btn = document.createElement('button');
-                btn.className = 'word-btn';
+                btn.className = 'btn-3d btn-yellow';
+                btn.style.padding = '8px 15px';
                 btn.innerText = word;
                 btn.onclick = () => {
                     playerAreaEl.innerText += (playerAreaEl.innerText ? " " : "") + word;
                     btn.disabled = true;
+                    btn.style.opacity = 0.5;
+                    btn.style.boxShadow = 'none';
+                    btn.style.top = '4px';
                     checkAssemble(text);
                 };
                 wordBankEl.appendChild(btn);
             });
-            
             let resetBtn = document.createElement('button');
-            resetBtn.innerText = "↺ Сброс";
-            resetBtn.style.backgroundColor = "#95a5a6";
-            resetBtn.style.fontSize = "0.8rem";
+            resetBtn.innerText = "↺";
+            resetBtn.className = "btn-3d btn-gray";
             resetBtn.onclick = loadSentence;
-            wordBankEl.appendChild(document.createElement('br'));
             wordBankEl.appendChild(resetBtn);
         }
         else if (currentMode === 'gaps') {
             let words = text.split(' ');
             let html = "";
-            
-            words.forEach((word, index) => {
+            words.forEach(word => {
                 if (word.length > 3 && Math.random() > 0.4) {
                     html += `<input type="text" data-answer="${word.replace(/[.,!?:;]/g, '')}" 
-                             style="width:${word.length*10}px; border:1px solid #ccc; padding:5px; border-radius:5px; margin:2px;" 
+                             style="width:${word.length*12}px; border:2px solid #BDC3C7; padding:5px; border-radius:8px; margin:2px; font-family:inherit; font-size:1rem;" 
                              placeholder="?"> `;
                 } else {
                     html += word + " ";
                 }
             });
-            
             playerAreaEl.innerHTML = html;
-            
             let checkBtn = document.createElement('button');
             checkBtn.innerText = "Проверить";
-            checkBtn.style.backgroundColor = "#8e44ad";
+            checkBtn.className = "btn-3d btn-purple";
             checkBtn.onclick = checkGaps;
             wordBankEl.appendChild(checkBtn);
         }
         else if (currentMode === 'reveal') {
             revealIndex = 0;
-            playerAreaEl.innerHTML = '<span style="color:#bdc3c7; font-style:italic;">(Нажми "Показать слово")</span>';
-            
+            playerAreaEl.innerHTML = '<span style="color:#BDC3C7; font-style:italic;">...</span>';
             let revealBtn = document.createElement('button');
-            revealBtn.innerText = "👁️ Показать слово";
-            revealBtn.style.backgroundColor = "#34495e";
+            revealBtn.innerText = "👁️ След. слово";
+            revealBtn.className = "btn-3d btn-blue";
             revealBtn.onclick = () => revealNextWord(text);
             
             let resetBtn = document.createElement('button');
-            resetBtn.innerText = "↺ Сначала";
-            resetBtn.style.backgroundColor = "#95a5a6";
+            resetBtn.innerText = "↺";
+            resetBtn.className = "btn-3d btn-gray";
             resetBtn.onclick = loadSentence;
-
             wordBankEl.appendChild(revealBtn);
             wordBankEl.appendChild(resetBtn);
         }
         else if (currentMode === 'letter_by_letter') {
             letterWordIndex = 0;
             letterState = 0;
-            playerAreaEl.innerHTML = '<span style="color:#bdc3c7; font-style:italic;">(Нажми "Показать")</span>';
-            
+            playerAreaEl.innerHTML = '<span style="color:#BDC3C7; font-style:italic;">...</span>';
             let revealBtn = document.createElement('button');
-            revealBtn.innerText = "👁️ Показать";
-            revealBtn.style.backgroundColor = "#34495e";
+            revealBtn.innerText = "🔤 След. буква";
+            revealBtn.className = "btn-3d btn-red";
             revealBtn.onclick = () => revealNextLetterStep(text);
             
             let resetBtn = document.createElement('button');
-            resetBtn.innerText = "↺ Сначала";
-            resetBtn.style.backgroundColor = "#95a5a6";
+            resetBtn.innerText = "↺";
+            resetBtn.className = "btn-3d btn-gray";
             resetBtn.onclick = loadSentence;
-
             wordBankEl.appendChild(revealBtn);
             wordBankEl.appendChild(resetBtn);
         }
@@ -435,14 +657,11 @@
     function revealNextWord(originalText) {
         const words = originalText.split(' ');
         if (revealIndex < words.length) {
-            if (revealIndex === 0) {
-                playerAreaEl.innerText = ""; // Очистить заглушку
-            }
+            if (revealIndex === 0) playerAreaEl.innerText = "";
             playerAreaEl.innerText += (revealIndex > 0 ? " " : "") + words[revealIndex];
             revealIndex++;
-            
             if (revealIndex === words.length) {
-                feedbackEl.innerText = "Прочитано! 🎉";
+                feedbackEl.innerText = "Отлично!";
                 feedbackEl.className = "feedback correct";
                 playSound();
             }
@@ -451,45 +670,34 @@
 
     function revealNextLetterStep(originalText) {
         const words = originalText.split(' ');
-        
         if (letterWordIndex >= words.length) return;
 
         let displayText = "";
-        
-        // Add fully revealed words
-        for (let i = 0; i < letterWordIndex; i++) {
-            displayText += words[i] + " ";
-        }
+        for (let i = 0; i < letterWordIndex; i++) displayText += words[i] + " ";
 
         if (letterState === 0) {
-            // Show first letter
-            if (words[letterWordIndex].length > 0) {
-                 displayText += words[letterWordIndex][0]; 
-            }
+            if (words[letterWordIndex].length > 0) displayText += words[letterWordIndex][0]; 
             letterState = 1;
         } else {
-            // Show full word
             displayText += words[letterWordIndex];
             letterWordIndex++;
             letterState = 0;
-            
             if (letterWordIndex === words.length) {
-                feedbackEl.innerText = "Прочитано! 🎉";
+                feedbackEl.innerText = "Супер!";
                 feedbackEl.className = "feedback correct";
                 playSound();
             }
         }
-        
         playerAreaEl.innerText = displayText;
     }
 
     function checkAssemble(original) {
         if (playerAreaEl.innerText === original) {
-            feedbackEl.innerText = "Правильно! 🎉";
+            feedbackEl.innerText = "Верно! 🎉";
             feedbackEl.className = "feedback correct";
             playSound();
         } else if (playerAreaEl.innerText.length >= original.length) {
-            feedbackEl.innerText = "Ошибка, попробуй еще раз";
+            feedbackEl.innerText = "Попробуй еще раз!";
             feedbackEl.className = "feedback wrong";
         }
     }
@@ -497,32 +705,30 @@
     function checkGaps() {
         let inputs = playerAreaEl.querySelectorAll('input');
         let allCorrect = true;
-        
         inputs.forEach(input => {
             let val = input.value.trim().toLowerCase();
             let ans = input.dataset.answer.toLowerCase();
             if (val.replace(/[.,!]/g, '') === ans) {
-                input.style.borderColor = "#27ae60";
-                input.style.backgroundColor = "#eafaf1";
+                input.style.borderColor = "#2ECC71";
+                input.style.backgroundColor = "#E9F7EF";
             } else {
-                input.style.borderColor = "#c0392b";
-                input.style.backgroundColor = "#fadbd8";
+                input.style.borderColor = "#E74C3C";
+                input.style.backgroundColor = "#FDEDEC";
                 allCorrect = false;
             }
         });
 
         if (allCorrect) {
-            feedbackEl.innerText = "Отлично! Все верно! 🌟";
+            feedbackEl.innerText = "Все верно! 🌟";
             feedbackEl.className = "feedback correct";
             playSound();
         } else {
-            feedbackEl.innerText = "Есть ошибки, исправь красные поля";
+            feedbackEl.innerText = "Проверь красные поля";
             feedbackEl.className = "feedback wrong";
         }
     }
 
     init();
 </script>
-
 </body>
 </html>
