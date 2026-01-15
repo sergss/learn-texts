@@ -23,11 +23,12 @@
         }
 
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            /* Added Noto Color Emoji for Android support */
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Noto Color Emoji', 'Apple Color Emoji', sans-serif;
             background-color: var(--bg-teal);
-            background-image: linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent);
-            background-size: 50px 50px;
-            padding: 20px;
+            background-image: radial-gradient(#ffffff 15%, transparent 16%);
+            background-size: 20px 20px;
+            padding: 10px;
             text-align: center;
             color: var(--text-color);
             margin: 0;
@@ -35,57 +36,53 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .main-container {
             background: var(--card-bg);
-            border-radius: 25px;
-            padding: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            max-width: 700px;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+            max-width: 600px;
             width: 100%;
             position: relative;
         }
 
-        /* Decorative Header */
         h1 {
-            margin: 0 0 20px 0;
-            font-size: 2.5rem;
-            letter-spacing: 2px;
-            text-shadow: 2px 2px 0px #eee;
+            margin: 5px 0 15px 0;
+            font-size: 2rem;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0px #eee;
         }
         
-        .title-word span { display: inline-block; transform: rotate(-5deg); }
-        .title-word span:nth-child(even) { transform: rotate(5deg); }
-        
+        .title-word span { display: inline-block; }
         .color-e { color: var(--btn-blue); }
         .color-a { color: var(--btn-red); }
         .color-s { color: var(--btn-yellow); }
         .color-y { color: var(--btn-green); }
 
-        /* Navigation Bar */
         .nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: #ECF0F1;
-            padding: 10px 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 15px;
         }
 
         .progress-indicator {
             font-weight: bold;
             color: #7F8C8D;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
-        /* Canvas Area */
         .scene-container {
-            border: 4px solid #BDC3C7;
-            border-radius: 15px;
+            border: 3px solid #BDC3C7;
+            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             background: #fff;
         }
         
@@ -95,10 +92,9 @@
             height: auto;
         }
 
-        /* Text Display Area */
         .game-area {
-            min-height: 80px;
-            margin-bottom: 20px;
+            min-height: 70px;
+            margin-bottom: 15px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -106,91 +102,88 @@
         }
 
         .sentence-display {
-            font-size: 1.6em;
+            font-size: 1.4em;
             color: #2C3E50;
-            line-height: 1.4;
-            padding: 10px;
+            line-height: 1.3;
+            padding: 5px;
         }
 
-        /* 3D Buttons */
         .btn-3d {
             border: none;
             color: white;
-            padding: 12px 20px;
-            font-size: 1rem;
+            padding: 12px 10px;
+            font-size: 0.95rem;
             font-weight: bold;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.1s;
+            transition: transform 0.1s;
             position: relative;
             top: 0;
-            margin: 5px;
+            margin: 4px;
             font-family: inherit;
+            touch-action: manipulation; 
         }
 
         .btn-3d:active {
-            top: 4px;
-            box-shadow: 0 0 0 !important;
+            transform: translateY(3px);
+            box-shadow: none !important;
         }
 
-        /* Button Variants */
-        .btn-blue { background-color: var(--btn-blue); box-shadow: 0 5px 0 var(--btn-blue-shadow); }
-        .btn-red { background-color: var(--btn-red); box-shadow: 0 5px 0 var(--btn-red-shadow); }
-        .btn-yellow { background-color: var(--btn-yellow); box-shadow: 0 5px 0 var(--btn-yellow-shadow); color: #5D4037; }
-        .btn-green { background-color: var(--btn-green); box-shadow: 0 5px 0 var(--btn-green-shadow); }
-        .btn-purple { background-color: var(--btn-purple); box-shadow: 0 5px 0 var(--btn-purple-shadow); }
-        .btn-gray { background-color: #95A5A6; box-shadow: 0 5px 0 #7F8C8D; }
+        .btn-blue { background-color: var(--btn-blue); box-shadow: 0 4px 0 var(--btn-blue-shadow); }
+        .btn-red { background-color: var(--btn-red); box-shadow: 0 4px 0 var(--btn-red-shadow); }
+        .btn-yellow { background-color: var(--btn-yellow); box-shadow: 0 4px 0 var(--btn-yellow-shadow); color: #5D4037; }
+        .btn-green { background-color: var(--btn-green); box-shadow: 0 4px 0 var(--btn-green-shadow); }
+        .btn-purple { background-color: var(--btn-purple); box-shadow: 0 4px 0 var(--btn-purple-shadow); }
+        .btn-gray { background-color: #95A5A6; box-shadow: 0 4px 0 #7F8C8D; }
         
-        .btn-nav { font-size: 1.2rem; padding: 8px 15px; border-radius: 50%; width: 50px; height: 50px; display: inline-flex; justify-content: center; align-items: center; }
+        .btn-nav { font-size: 1.2rem; padding: 5px; width: 44px; height: 44px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; }
 
-        /* Modes Grid */
         .modes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 8px;
             margin-top: 15px;
             background: #F4F6F7;
-            padding: 15px;
-            border-radius: 15px;
+            padding: 10px;
+            border-radius: 12px;
         }
         
-        /* Word Bank (Assemble Mode) */
         #wordBank {
-            margin-top: 15px;
+            margin-top: 10px;
             min-height: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
-        /* Feedback */
         .feedback {
             font-weight: bold;
-            font-size: 1.2em;
-            height: 30px;
-            margin: 10px 0;
+            font-size: 1.1em;
+            min-height: 25px;
+            margin: 5px 0;
         }
         .correct { color: var(--btn-green); }
         .wrong { color: var(--btn-red); }
 
-        /* Full Text Drawer */
         .full-text-drawer {
-            margin-top: 30px;
+            margin-top: 20px;
             border-top: 2px dashed #BDC3C7;
             padding-top: 15px;
         }
         .full-text-content {
             text-align: left;
             background: #ECF0F1;
-            padding: 15px;
+            padding: 10px;
             border-radius: 10px;
             max-height: 150px;
             overflow-y: auto;
             display: none;
             font-size: 0.9rem;
         }
-        .text-sentence { cursor: pointer; padding: 2px 5px; border-radius: 4px; }
+        .text-sentence { cursor: pointer; padding: 4px; border-radius: 4px; display: inline-block; margin-bottom: 2px; }
         .text-sentence:hover { background-color: #D5DBDB; }
         .text-sentence.active { background-color: var(--btn-yellow); color: #fff; font-weight: bold; }
 
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -198,24 +191,19 @@
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 2000;
         }
         .modal-card {
             background: white;
-            padding: 25px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 320px;
+            width: 85%;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
         .modal-message {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             margin-bottom: 20px;
             color: #2C3E50;
         }
@@ -225,33 +213,43 @@
             gap: 15px;
         }
 
-        /* Utilities */
         .w-100 { width: 100%; box-sizing: border-box; }
-        .icon { margin-right: 5px; }
 
-        /* Mobile tweaks */
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .modes-grid { grid-template-columns: 1fr 1fr; }
-            .btn-3d { font-size: 0.9rem; padding: 10px; }
+        /* DEBUG CONSOLE */
+        #debugConsole {
+            display: block; /* Visible for debugging */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            overflow-y: scroll;
+            z-index: 9999;
+            padding: 5px;
+            box-sizing: border-box;
+            text-align: left;
+            pointer-events: none; /* Let clicks pass through */
         }
     </style>
 </head>
 <body>
 
+<!-- On-screen console -->
+<div id="debugConsole">Waiting for logs...</div>
+
 <div class="main-container">
     <h1>
-        <span class="title-word">
-            <span class="color-e">E</span><span class="color-a">A</span><span class="color-s">S</span><span class="color-y">Y</span>
-        </span> 
-        <span class="title-word">
-            <span class="color-e">E</span><span class="color-y">N</span><span class="color-s">G</span><span class="color-a">L</span><span class="color-e">I</span><span class="color-s">S</span><span class="color-y">H</span>
-        </span>
+        <span class="title-word"><span class="color-e">E</span><span class="color-a">A</span><span class="color-s">S</span><span class="color-y">Y</span></span> 
+        <span class="title-word"><span class="color-e">E</span><span class="color-y">N</span><span class="color-s">G</span><span class="color-a">L</span><span class="color-e">I</span><span class="color-s">S</span><span class="color-y">H</span></span>
     </h1>
 
     <div class="nav-bar">
         <button class="btn-3d btn-gray btn-nav" onclick="prevSentence()">⬅️</button>
-        <div class="progress-indicator">Карточка <span id="currentStep">1</span> / <span id="totalSteps">12</span></div>
+        <div class="progress-indicator"><span id="currentStep">1</span> / <span id="totalSteps">12</span></div>
         <button class="btn-3d btn-green btn-nav" onclick="nextSentence()">➡️</button>
     </div>
 
@@ -261,7 +259,7 @@
 
     <div class="game-area">
         <div id="targetText" class="sentence-display" style="display:none;"></div>
-        <div id="playerArea" class="sentence-display">Нажми "Слушать" или выбери режим</div>
+        <div id="playerArea" class="sentence-display">Загрузка...</div>
         <div class="feedback" id="feedback"></div>
         <div id="wordBank"></div>
     </div>
@@ -282,8 +280,8 @@
 
     <!-- Bottom / Admin -->
     <div class="full-text-drawer">
-        <button onclick="toggleFullText()" class="btn-3d btn-gray" style="font-size: 0.8rem; padding: 8px 15px;">📜 Показать весь текст</button>
-        <div class="admin-controls" style="display:inline-block; float: right;">
+        <button onclick="toggleFullText()" class="btn-3d btn-gray" style="font-size: 0.8rem; padding: 8px 15px; width: 100%;">📜 Показать весь текст</button>
+        <div style="margin-top: 10px; text-align: right;">
             <button onclick="deleteCurrentSentence()" class="btn-3d btn-red" style="font-size: 0.8rem; padding: 8px 10px;">❌</button>
             <button onclick="resetStory()" class="btn-3d btn-yellow" style="font-size: 0.8rem; padding: 8px 10px;">↺</button>
         </div>
@@ -303,6 +301,22 @@
 </div>
 
 <script>
+    // --- DEBUG LOGGER ---
+    const debugConsole = document.getElementById('debugConsole');
+    function log(msg) {
+        const d = document.createElement('div');
+        d.textContent = "> " + msg;
+        debugConsole.appendChild(d);
+        debugConsole.scrollTop = debugConsole.scrollHeight;
+        console.log(msg);
+    }
+    
+    window.onerror = function(msg, url, line) {
+        log("ERR: " + msg + " (L:" + line + ")");
+    };
+
+    log("Starting app...");
+
     const defaultStory = [
         "Ivanushka feels very frightened.",
         "He opens his mouth, ready to shout to his brothers.",
@@ -340,28 +354,43 @@
     const canvas = document.getElementById('sceneCanvas');
     const ctx = canvas.getContext('2d');
     
-    // --- Audio Init Fix ---
+    // --- Audio Init ---
     let voices = [];
-    
     function initVoices() {
-        voices = window.speechSynthesis.getVoices();
-        // Some browsers need a kickstart
-        if (voices.length === 0) {
-            setTimeout(initVoices, 100);
+        if (!window.speechSynthesis) {
+            log("Speech API missing");
+            return;
         }
+        voices = window.speechSynthesis.getVoices();
+        log("Voices found: " + voices.length);
     }
     
-    initVoices();
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = initVoices;
+    try {
+        initVoices();
+        if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = initVoices;
+        }
+    } catch (e) {
+        log("Audio Setup Error: " + e.message);
     }
 
-    // Attempt to unlock audio on first interaction if needed
-    document.body.addEventListener('click', function unlockAudio() {
-        const u = new SpeechSynthesisUtterance(""); 
-        window.speechSynthesis.speak(u);
-        document.body.removeEventListener('click', unlockAudio);
-    }, { once: true });
+    // --- Safe Storage (CRITICAL FOR ANDROID) ---
+    function safeGetItem(key) {
+        try {
+            return localStorage.getItem(key);
+        } catch (e) {
+            log("Storage READ blocked. Using temp memory.");
+            return null;
+        }
+    }
+
+    function safeSetItem(key, val) {
+        try {
+            localStorage.setItem(key, val);
+        } catch (e) {
+            log("Storage WRITE blocked.");
+        }
+    }
 
     // --- Modal Logic ---
     const modal = document.getElementById('customModal');
@@ -395,16 +424,18 @@
     // --- App Logic ---
 
     function init() {
-        loadFromStorage();
-        if (story.length === 0) {
-            // Can't use custom modal here easily without blocking, 
-            // so we just restore silently or check length > 0 logic elsewhere.
-            // But let's just restore default if empty.
-            story = [...defaultStory];
-            saveToStorage();
+        try {
+            loadFromStorage();
+            if (!story || story.length === 0) {
+                story = [...defaultStory];
+                saveToStorage();
+            }
+            renderFullText();
+            loadSentence();
+            log("Ready!");
+        } catch (e) {
+            log("CRASH in init: " + e.message);
         }
-        renderFullText();
-        loadSentence();
     }
 
     const keywords = {
@@ -424,60 +455,71 @@
     };
 
     function drawScene(text) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Sky
-        ctx.fillStyle = '#EBF5FB';
-        ctx.fillRect(0,0, canvas.width, canvas.height);
+        try {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Sky
+            ctx.fillStyle = '#EBF5FB';
+            ctx.fillRect(0,0, canvas.width, canvas.height);
 
-        // Ground
-        ctx.beginPath();
-        ctx.moveTo(0, 200);
-        ctx.bezierCurveTo(200, 190, 400, 210, 600, 200);
-        ctx.lineTo(600, 250);
-        ctx.lineTo(0, 250);
-        ctx.fillStyle = '#2ECC71';
-        ctx.fill();
-        ctx.strokeStyle = '#27AE60';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+            // Ground
+            ctx.beginPath();
+            ctx.moveTo(0, 200);
+            ctx.bezierCurveTo(200, 190, 400, 210, 600, 200);
+            ctx.lineTo(600, 250);
+            ctx.lineTo(0, 250);
+            ctx.fillStyle = '#2ECC71';
+            ctx.fill();
+            ctx.strokeStyle = '#27AE60';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-        const lowerText = text.toLowerCase();
-        let objectsToDraw = [];
+            if (!text) return;
+            const lowerText = text.toLowerCase();
+            let objectsToDraw = [];
 
-        for (let word in keywords) {
-            if (lowerText.includes(word)) {
-                objectsToDraw.push(keywords[word]);
+            for (let word in keywords) {
+                if (lowerText.includes(word)) {
+                    objectsToDraw.push(keywords[word]);
+                }
             }
-        }
-        
-        objectsToDraw = [...new Set(objectsToDraw)];
-        if (objectsToDraw.length === 0) objectsToDraw.push('❓');
+            
+            objectsToDraw = [...new Set(objectsToDraw)];
+            if (objectsToDraw.length === 0) objectsToDraw.push('❓');
 
-        const step = canvas.width / (objectsToDraw.length + 1);
-        ctx.font = "80px serif"; 
-        ctx.textAlign = "center";
-        ctx.textBaseline = "bottom";
-        
-        objectsToDraw.forEach((emoji, index) => {
-            const x = step * (index + 1);
-            let y = 220; 
-            if (emoji === '☀️' || emoji === '🌙') y = 100;
-            ctx.fillText(emoji, x, y);
-        });
+            const step = canvas.width / (objectsToDraw.length + 1);
+            
+            // Font Stack ensures Android emojis work
+            ctx.font = "80px 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif"; 
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            
+            objectsToDraw.forEach((emoji, index) => {
+                const x = step * (index + 1);
+                let y = 220; 
+                if (emoji === '☀️' || emoji === '🌙') y = 100;
+                ctx.fillText(emoji, x, y);
+            });
+        } catch (e) {
+            log("Draw error: " + e.message);
+        }
     }
 
     function loadFromStorage() {
-        const saved = localStorage.getItem(STORAGE_KEY);
+        const saved = safeGetItem(STORAGE_KEY);
         if (saved) {
-            story = JSON.parse(saved);
+            try {
+                story = JSON.parse(saved);
+            } catch (e) {
+                story = [...defaultStory];
+            }
         } else {
             story = [...defaultStory];
         }
     }
 
     function saveToStorage() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(story));
+        safeSetItem(STORAGE_KEY, JSON.stringify(story));
     }
 
     function resetStory() {
@@ -514,6 +556,7 @@
     function renderFullText() {
         fullTextContainer.innerHTML = story.map((sent, idx) => {
             const isActive = idx === currentIndex ? 'active' : '';
+            const safeSent = sent.replace(/'/g, "\'" );
             return `<span class="text-sentence ${isActive}" onclick="jumpTo(${idx})">${sent}</span>`;
         }).join(' ');
     }
@@ -546,11 +589,14 @@
     }
 
     function playSound() {
+        if (!window.speechSynthesis) {
+            showAlert("Ваш браузер не поддерживает озвучку");
+            return;
+        }
         speechSynthesis.cancel();
         const text = story[currentIndex];
         const utterance = new SpeechSynthesisUtterance(text);
         
-        // Try to pick a better English voice if available
         const enVoice = voices.find(v => v.lang.startsWith('en-GB')) || 
                         voices.find(v => v.lang.startsWith('en-US'));
         if (enVoice) utterance.voice = enVoice;
@@ -559,7 +605,10 @@
         utterance.rate = 0.8;
         listenBtnEl.classList.add('active');
         utterance.onend = () => listenBtnEl.classList.remove('active');
-        utterance.onerror = () => listenBtnEl.classList.remove('active');
+        utterance.onerror = (e) => {
+            listenBtnEl.classList.remove('active');
+            log("Speech Err: " + e.error);
+        };
         
         speechSynthesis.speak(utterance);
     }
@@ -734,7 +783,7 @@
     // Telegram Mini App Init
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand(); // Раскрыть на весь экран
+        window.Telegram.WebApp.expand();
     }
 </script>
 </body>
