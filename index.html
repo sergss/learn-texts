@@ -100,6 +100,39 @@
     const totalEl = document.getElementById('totalSteps');
     const listenBtnEl = document.getElementById('listenBtn');
     const fullTextContainer = document.getElementById('fullTextContainer');
+    
+    // "Разогрев" синтеза речи
+    let audioContextInitialized = false;
+
+    function warmUpAudio() {
+        if (!audioContextInitialized) {
+            // Принудительная подгрузка списка голосов
+            window.speechSynthesis.getVoices();
+            
+            // Попытка запустить тишину
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0;
+            speechSynthesis.speak(utterance);
+            
+            // Если браузер не заблокировал, считаем инициализированным
+            if (!speechSynthesis.pending && !speechSynthesis.speaking) {
+                // Но гарантии нет, поэтому флаг ставим только после реального события или клика
+                // Для надежности оставим false, чтобы click тоже сработал, если автоплей заблокирован
+            }
+        }
+    }
+
+    // Попытка 1: Сразу при загрузке (может быть заблокировано браузером)
+    warmUpAudio();
+
+    // Попытка 2: При первом клике (гарантированно работает)
+    document.addEventListener('click', function initAudio() {
+        if (!audioContextInitialized) {
+            warmUpAudio();
+            audioContextInitialized = true; // Теперь точно
+            document.removeEventListener('click', initAudio);
+        }
+    });
 
     function init() {
         loadFromStorage();
@@ -206,6 +239,9 @@
     }
 
     function playSound() {
+        // Сброс очереди для устранения задержек
+        speechSynthesis.cancel();
+
         const text = story[currentIndex];
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-GB';
