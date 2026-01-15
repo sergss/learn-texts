@@ -18,6 +18,19 @@
         .correct { color: #27ae60; }
         .wrong { color: #c0392b; }
         .progress { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px; }
+        
+        /* Styles for Full Text View */
+        .full-text-area { text-align: left; background: #fff; border: 2px dashed #bdc3c7; padding: 15px; margin: 20px 0; border-radius: 10px; max-height: 200px; overflow-y: auto; display: none; }
+        .text-sentence { cursor: pointer; padding: 2px 5px; border-radius: 4px; transition: background 0.2s; display: inline; margin-right: 4px; }
+        .text-sentence:hover { background-color: #eaf2f8; }
+        .text-sentence.active { background-color: #f1c40f; color: #fff; font-weight: bold; }
+        
+        .admin-controls { margin-top: 15px; font-size: 0.8rem; }
+        .btn-small { padding: 5px 10px; font-size: 0.8rem; border-radius: 5px; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-danger:hover { background-color: #c0392b; }
+        .btn-warning { background-color: #f39c12; }
+        .btn-warning:hover { background-color: #d35400; }
     </style>
 </head>
 <body>
@@ -26,6 +39,9 @@
     <h1>🐴 Sivka-Burka</h1>
     <div class="progress">Предложение <span id="currentStep">1</span> из <span id="totalSteps">12</span></div>
     
+    <button onclick="toggleFullText()" class="btn-small" style="background-color: #95a5a6; margin-bottom: 10px;">📜 Показать/Скрыть текст</button>
+    <div id="fullTextContainer" class="full-text-area"></div>
+
     <div id="gameArea">
         <div id="targetText" class="sentence-display" style="display:none;"></div>
         <div id="playerArea" class="sentence-display">Нажми "Старт"</div>
@@ -42,12 +58,17 @@
         <button onclick="setMode('assemble')">🧩 Собрать слова</button>
         <button onclick="setMode('gaps')">📝 Вставить пропуски</button>
         <button onclick="setMode('read')">📖 Просто читать</button>
+        
+        <div class="admin-controls">
+            <button onclick="deleteCurrentSentence()" class="btn-small btn-danger">❌ Удалить предложение</button>
+            <button onclick="resetStory()" class="btn-small btn-warning">↺ Сброс текста</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // Текст из учебника
-    const story = [
+    // Исходный текст (по умолчанию)
+    const defaultStory = [
         "Ivanushka feels very frightened.",
         "He opens his mouth, ready to shout to his brothers.",
         "Then he sees a big beautiful brown horse running into the field.",
@@ -66,8 +87,10 @@
         "Ivanushka follows his brothers home, smiling to himself."
     ];
 
+    let story = [];
     let currentIndex = 0;
     let currentMode = 'read'; // read, assemble, gaps
+    const STORAGE_KEY = 'sivka_story_data_v1';
 
     const targetTextEl = document.getElementById('targetText');
     const playerAreaEl = document.getElementById('playerArea');
@@ -76,10 +99,87 @@
     const stepEl = document.getElementById('currentStep');
     const totalEl = document.getElementById('totalSteps');
     const listenBtnEl = document.getElementById('listenBtn');
-
-    totalEl.innerText = story.length;
+    const fullTextContainer = document.getElementById('fullTextContainer');
 
     function init() {
+        loadFromStorage();
+        if (story.length === 0) {
+            resetStory(); // Если пусто, грузим дефолт
+        } else {
+            renderFullText();
+            loadSentence();
+        }
+    }
+
+    // --- Управление данными ---
+
+    function loadFromStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+            story = JSON.parse(saved);
+        } else {
+            story = [...defaultStory];
+        }
+    }
+
+    function saveToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(story));
+    }
+
+    function resetStory() {
+        if (confirm("Вы уверены, что хотите сбросить текст к исходному состоянию?")) {
+            story = [...defaultStory];
+            saveToStorage();
+            currentIndex = 0;
+            renderFullText();
+            loadSentence();
+            feedbackEl.innerText = "Текст сброшен!";
+            feedbackEl.className = "feedback";
+        }
+    }
+
+    function deleteCurrentSentence() {
+        if (story.length <= 1) {
+            alert("Нельзя удалить последнее предложение!");
+            return;
+        }
+        if (confirm("Удалить текущее предложение?")) {
+            story.splice(currentIndex, 1);
+            saveToStorage();
+            
+            // Корректируем индекс
+            if (currentIndex >= story.length) {
+                currentIndex = story.length - 1;
+            }
+            
+            renderFullText();
+            loadSentence();
+            feedbackEl.innerText = "Предложение удалено";
+            feedbackEl.className = "feedback correct";
+        }
+    }
+
+    // --- Интерфейс ---
+
+    function toggleFullText() {
+        if (fullTextContainer.style.display === 'none' || fullTextContainer.style.display === '') {
+            fullTextContainer.style.display = 'block';
+        } else {
+            fullTextContainer.style.display = 'none';
+        }
+    }
+
+    function renderFullText() {
+        fullTextContainer.innerHTML = story.map((sent, idx) => {
+            const isActive = idx === currentIndex ? 'active' : '';
+            // Экранируем кавычки для onclick
+            const safeSent = sent.replace(/'/g, "\\'"); 
+            return `<span class="text-sentence ${isActive}" onclick="jumpTo(${idx})">${sent}</span>`;
+        }).join(' ');
+    }
+
+    function jumpTo(index) {
+        currentIndex = index;
         loadSentence();
     }
 
@@ -108,10 +208,9 @@
     function playSound() {
         const text = story[currentIndex];
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-GB'; // Британский английский (как в учебнике)
-        utterance.rate = 0.8; // Чуть медленнее для обучения
+        utterance.lang = 'en-GB';
+        utterance.rate = 0.8;
         
-        // Блокировка кнопки
         listenBtnEl.disabled = true;
         listenBtnEl.style.opacity = "0.5";
         listenBtnEl.style.cursor = "not-allowed";
@@ -132,10 +231,14 @@
     }
 
     function loadSentence() {
+        totalEl.innerText = story.length;
         stepEl.innerText = currentIndex + 1;
         feedbackEl.innerText = "";
         const text = story[currentIndex];
         
+        // Обновляем подсветку в полном тексте
+        renderFullText(); // Можно оптимизировать, меняя классы, но ререндер прост и надежен для малого текста
+
         // Очистка
         wordBankEl.innerHTML = '';
         playerAreaEl.innerHTML = '';
@@ -145,7 +248,6 @@
             playerAreaEl.innerText = text;
         } 
         else if (currentMode === 'assemble') {
-            // Режим сборки слов
             let words = text.split(' ');
             let shuffled = [...words].sort(() => Math.random() - 0.5);
             
@@ -161,7 +263,6 @@
                 wordBankEl.appendChild(btn);
             });
             
-            // Кнопка сброса
             let resetBtn = document.createElement('button');
             resetBtn.innerText = "↺ Сброс";
             resetBtn.style.backgroundColor = "#95a5a6";
@@ -171,12 +272,10 @@
             wordBankEl.appendChild(resetBtn);
         }
         else if (currentMode === 'gaps') {
-            // Режим пропусков (каждое 3-е слово или длинные слова)
             let words = text.split(' ');
             let html = "";
             
             words.forEach((word, index) => {
-                // Скрываем слова длиннее 3 букв с вероятностью 50%
                 if (word.length > 3 && Math.random() > 0.4) {
                     html += `<input type="text" data-answer="${word.replace(/[.,!?:;]/g, '')}" 
                              style="width:${word.length*10}px; border:1px solid #ccc; padding:5px; border-radius:5px; margin:2px;" 
@@ -200,7 +299,7 @@
         if (playerAreaEl.innerText === original) {
             feedbackEl.innerText = "Правильно! 🎉";
             feedbackEl.className = "feedback correct";
-            playSound(); // Авто озвучка при успехе
+            playSound();
         } else if (playerAreaEl.innerText.length >= original.length) {
             feedbackEl.innerText = "Ошибка, попробуй еще раз";
             feedbackEl.className = "feedback wrong";
@@ -214,7 +313,6 @@
         inputs.forEach(input => {
             let val = input.value.trim().toLowerCase();
             let ans = input.dataset.answer.toLowerCase();
-            // Упрощенная проверка (игнорируем знаки препинания в ответе ребенка)
             if (val.replace(/[.,!]/g, '') === ans) {
                 input.style.borderColor = "#27ae60";
                 input.style.backgroundColor = "#eafaf1";
@@ -235,7 +333,6 @@
         }
     }
 
-    // Старт
     init();
 </script>
 
