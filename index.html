@@ -642,30 +642,51 @@
     }
 
     function playNetworkTTS(text) {
-        // 2. Google Translate TTS Hack (Client-side)
-        // Note: This relies on Google's public API remaining open for 'tw-ob' client
-        const url = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(text);
-        
-        const audio = new Audio(url);
-        
+        // Список серверов для озвучки (если один не сработает, пробуем следующий)
+        const urls = [
+            // 1. Youdao (очень надежный для английского, возвращает MP3)
+            "https://dict.youdao.com/dictvoice?type=1&audio=" + encodeURIComponent(text),
+            // 2. Google Translate (Client GTX - часто работает лучше)
+            "https://translate.google.com/translate_tts?ie=UTF-8&client=gtx&tl=en&q=" + encodeURIComponent(text),
+            // 3. Google Translate (Client TW-OB - старый вариант)
+            "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=" + encodeURIComponent(text)
+        ];
+
+        let attempt = 0;
+
+        function tryNext() {
+            if (attempt >= urls.length) {
+                listenBtnEl.classList.remove('active');
+                log("All Network Audio Failed.");
+                showAlert("Не удалось загрузить звук. Проверьте интернет.");
+                return;
+            }
+
+            const url = urls[attempt];
+            log("Trying Audio Source " + (attempt + 1) + "...");
+            attempt++;
+
+            const audio = new Audio(url);
+            
+            audio.onended = () => {
+                listenBtnEl.classList.remove('active');
+                log("Audio finished.");
+            };
+            
+            audio.onerror = (e) => {
+                const code = e.target.error ? e.target.error.code : 'unknown';
+                log("Source failed (Code " + code + "). Switching...");
+                tryNext(); // Пробуем следующую ссылку
+            };
+            
+            audio.play().catch(e => {
+                 log("Play blocked: " + e.message);
+                 tryNext();
+            });
+        }
+
         listenBtnEl.classList.add('active');
-        log("Loading audio from URL...");
-        
-        audio.onended = () => {
-            listenBtnEl.classList.remove('active');
-            log("Audio finished.");
-        };
-        
-        audio.onerror = (e) => {
-            listenBtnEl.classList.remove('active');
-            log("Network Audio Failed: " + (e.target.error ? e.target.error.code : 'unknown'));
-            showAlert("Не удалось воспроизвести звук. Проверьте интернет.");
-        };
-        
-        audio.play().catch(e => {
-             log("Play blocked: " + e.message);
-             showAlert("Нажмите еще раз, чтобы разрешить звук.");
-        });
+        tryNext();
     }
 
     function loadSentence() {
