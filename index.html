@@ -42,6 +42,9 @@
     <button onclick="toggleFullText()" class="btn-small" style="background-color: #95a5a6; margin-bottom: 10px;">📜 Показать/Скрыть текст</button>
     <div id="fullTextContainer" class="full-text-area"></div>
 
+    <!-- Canvas Area -->
+    <canvas id="sceneCanvas" width="600" height="300" style="background: white; border: 2px solid #333; border-radius: 10px; margin: 20px auto; display: block;"></canvas>
+
     <div id="gameArea">
         <div id="targetText" class="sentence-display" style="display:none;"></div>
         <div id="playerArea" class="sentence-display">Нажми "Старт"</div>
@@ -100,36 +103,32 @@
     const totalEl = document.getElementById('totalSteps');
     const listenBtnEl = document.getElementById('listenBtn');
     const fullTextContainer = document.getElementById('fullTextContainer');
+    const canvas = document.getElementById('sceneCanvas');
+    const ctx = canvas.getContext('2d');
     
     // "Разогрев" синтеза речи
     let audioContextInitialized = false;
 
     function warmUpAudio() {
         if (!audioContextInitialized) {
-            // Принудительная подгрузка списка голосов
             window.speechSynthesis.getVoices();
-            
-            // Попытка запустить тишину
             const utterance = new SpeechSynthesisUtterance('');
             utterance.volume = 0;
             speechSynthesis.speak(utterance);
-            
-            // Если браузер не заблокировал, считаем инициализированным
             if (!speechSynthesis.pending && !speechSynthesis.speaking) {
-                // Но гарантии нет, поэтому флаг ставим только после реального события или клика
-                // Для надежности оставим false, чтобы click тоже сработал, если автоплей заблокирован
+                // audioContextInitialized = true; // Опционально
             }
         }
     }
 
-    // Попытка 1: Сразу при загрузке (может быть заблокировано браузером)
+    // Попытка 1: Сразу при загрузке
     warmUpAudio();
 
-    // Попытка 2: При первом клике (гарантированно работает)
+    // Попытка 2: При первом клике
     document.addEventListener('click', function initAudio() {
         if (!audioContextInitialized) {
             warmUpAudio();
-            audioContextInitialized = true; // Теперь точно
+            audioContextInitialized = true;
             document.removeEventListener('click', initAudio);
         }
     });
@@ -137,11 +136,84 @@
     function init() {
         loadFromStorage();
         if (story.length === 0) {
-            resetStory(); // Если пусто, грузим дефолт
+            resetStory();
         } else {
             renderFullText();
             loadSentence();
         }
+    }
+    
+    // --- Canvas "Раскраска" ---
+    
+    // Словарь объектов: слово -> эмодзи
+    const keywords = {
+        'ivanushka': '🧑', 'he': '🧑', 'boy': '🧑', 'brother': '👱', 'brothers': '👱👱',
+        'horse': '🐎', 'sivka': '🐎', 'sivka-burka': '🐎',
+        'field': '🌾', 'wheat': '🌾', 'grass': '🌿',
+        'sun': '☀️', 'morning': '☀️',
+        'moon': '🌙', 'night': '🌙',
+        'mouth': '👄', 'shout': '🗣️', 'cries': '🗣️',
+        'open': '😮', 'frightened': '😱', 'scared': '😱',
+        'saddle': '🪑', 'golden': '✨', 'silver': '🥈', 'magic': '✨',
+        'home': '🏠', 'house': '🏠',
+        'friend': '🤝', 'help': '🆘',
+        'call': '📞', 'time': '⏳',
+        'wake': '🥱', 'sleep': '😴',
+        'smile': '🙂', 'smiling': '🙂'
+    };
+
+    function drawScene(text) {
+        // Очистка
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 1. Рисуем "землю" (горизонт)
+        ctx.beginPath();
+        ctx.moveTo(0, 250);
+        ctx.bezierCurveTo(200, 240, 400, 260, 600, 250);
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 2. Ищем ключевые слова
+        const lowerText = text.toLowerCase();
+        let objectsToDraw = [];
+
+        for (let word in keywords) {
+            if (lowerText.includes(word)) {
+                // Избегаем дубликатов для синонимов (например ivanushka и he)
+                // Простая эвристика: добавляем объект
+                objectsToDraw.push(keywords[word]);
+            }
+        }
+        
+        // Удаляем дубликаты эмодзи, если они не нужны (например, два раза 🧑)
+        objectsToDraw = [...new Set(objectsToDraw)];
+        
+        // Если ничего не нашли, рисуем вопросик или абстракцию
+        if (objectsToDraw.length === 0) {
+            objectsToDraw.push('❓');
+        }
+
+        // 3. Рисуем объекты
+        // Распределяем их по ширине канваса
+        const step = canvas.width / (objectsToDraw.length + 1);
+        
+        ctx.font = "100px serif"; // Большой размер для эмодзи
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        
+        objectsToDraw.forEach((emoji, index) => {
+            const x = step * (index + 1);
+            let y = 250; // На земле
+            
+            // Спец. позиция для солнца/луны
+            if (emoji === '☀️' || emoji === '🌙') {
+                y = 100; // В небе
+            }
+            
+            // Рисуем цветные эмодзи
+            ctx.fillText(emoji, x, y);
+        });
     }
 
     // --- Управление данными ---
@@ -179,12 +251,9 @@
         if (confirm("Удалить текущее предложение?")) {
             story.splice(currentIndex, 1);
             saveToStorage();
-            
-            // Корректируем индекс
             if (currentIndex >= story.length) {
                 currentIndex = story.length - 1;
             }
-            
             renderFullText();
             loadSentence();
             feedbackEl.innerText = "Предложение удалено";
@@ -205,7 +274,6 @@
     function renderFullText() {
         fullTextContainer.innerHTML = story.map((sent, idx) => {
             const isActive = idx === currentIndex ? 'active' : '';
-            // Экранируем кавычки для onclick
             const safeSent = sent.replace(/'/g, "\\'"); 
             return `<span class="text-sentence ${isActive}" onclick="jumpTo(${idx})">${sent}</span>`;
         }).join(' ');
@@ -272,8 +340,11 @@
         feedbackEl.innerText = "";
         const text = story[currentIndex];
         
+        // Рисуем сцену
+        drawScene(text);
+        
         // Обновляем подсветку в полном тексте
-        renderFullText(); // Можно оптимизировать, меняя классы, но ререндер прост и надежен для малого текста
+        renderFullText(); 
 
         // Очистка
         wordBankEl.innerHTML = '';
