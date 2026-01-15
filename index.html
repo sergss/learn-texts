@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sivka-Burka Trainer</title>
+    <style>
+        body { font-family: 'Comic Sans MS', sans-serif; background-color: #f0f8ff; padding: 20px; text-align: center; }
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 600px; margin: 0 auto; }
+        h1 { color: #2c3e50; }
+        .sentence-display { font-size: 1.5em; color: #333; margin: 20px 0; min-height: 60px; line-height: 1.4; }
+        button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 1rem; border-radius: 10px; cursor: pointer; margin: 5px; transition: 0.2s; }
+        button:hover { background-color: #2980b9; }
+        button.word-btn { background-color: #e67e22; margin: 5px; }
+        button.word-btn:disabled { background-color: #bdc3c7; cursor: default; }
+        .controls { margin-top: 20px; border-top: 2px solid #eee; padding-top: 20px; }
+        .feedback { font-weight: bold; font-size: 1.2em; margin-top: 10px; height: 30px; }
+        .correct { color: #27ae60; }
+        .wrong { color: #c0392b; }
+        .progress { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>🐴 Sivka-Burka</h1>
+    <div class="progress">Предложение <span id="currentStep">1</span> из <span id="totalSteps">12</span></div>
+    
+    <div id="gameArea">
+        <div id="targetText" class="sentence-display" style="display:none;"></div>
+        <div id="playerArea" class="sentence-display">Нажми "Старт"</div>
+        <div id="wordBank"></div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="controls">
+        <button onclick="playSound()">🔊 Прослушать</button>
+        <button onclick="nextSentence()" style="background-color: #27ae60;">Следующее ➡️</button>
+        <br><br>
+        <button onclick="setMode('assemble')">🧩 Собрать слова</button>
+        <button onclick="setMode('gaps')">📝 Вставить пропуски</button>
+        <button onclick="setMode('read')">📖 Просто читать</button>
+    </div>
+</div>
+
+<script>
+    // Текст из учебника
+    const story = [
+        "Ivanushka feels very frightened.",
+        "He opens his mouth, ready to shout to his brothers.",
+        "Then he sees a big beautiful brown horse running into the field.",
+        "Ivanushka looks at the horse with his mouth still open.",
+        "The horse has got a golden saddle and silver reins.",
+        "It looks like a magic horse!",
+        "It starts to eat the wheat, and Ivanushka walks quietly up to it and grabs the reins.",
+        "Aha! I've got you! he cries.",
+        "Oh, please let me go, says the horse.",
+        "I can be your friend.",
+        "If you ever need my help, just call me three times: Say Sivka-Burka, come!",
+        "Ivanushka feels sorry for the horse and lets him go.",
+        "But he does not tell his brothers about the horse.",
+        "When they wake up, Ivanushka is looking up at the morning sun.",
+        "Let's go home now, says Andrei.",
+        "Ivanushka follows his brothers home, smiling to himself."
+    ];
+
+    let currentIndex = 0;
+    let currentMode = 'read'; // read, assemble, gaps
+
+    const targetTextEl = document.getElementById('targetText');
+    const playerAreaEl = document.getElementById('playerArea');
+    const wordBankEl = document.getElementById('wordBank');
+    const feedbackEl = document.getElementById('feedback');
+    const stepEl = document.getElementById('currentStep');
+    const totalEl = document.getElementById('totalSteps');
+
+    totalEl.innerText = story.length;
+
+    function init() {
+        loadSentence();
+    }
+
+    function setMode(mode) {
+        currentMode = mode;
+        loadSentence();
+    }
+
+    function nextSentence() {
+        if (currentIndex < story.length - 1) {
+            currentIndex++;
+            loadSentence();
+        } else {
+            feedbackEl.innerText = "Молодец! Текст пройден!";
+            feedbackEl.className = "feedback correct";
+        }
+    }
+
+    function playSound() {
+        const text = story[currentIndex];
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-GB'; // Британский английский (как в учебнике)
+        utterance.rate = 0.8; // Чуть медленнее для обучения
+        speechSynthesis.speak(utterance);
+    }
+
+    function loadSentence() {
+        stepEl.innerText = currentIndex + 1;
+        feedbackEl.innerText = "";
+        const text = story[currentIndex];
+        
+        // Очистка
+        wordBankEl.innerHTML = '';
+        playerAreaEl.innerHTML = '';
+        targetTextEl.style.display = 'none';
+
+        if (currentMode === 'read') {
+            playerAreaEl.innerText = text;
+        } 
+        else if (currentMode === 'assemble') {
+            // Режим сборки слов
+            let words = text.split(' ');
+            let shuffled = [...words].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(word => {
+                let btn = document.createElement('button');
+                btn.className = 'word-btn';
+                btn.innerText = word;
+                btn.onclick = () => {
+                    playerAreaEl.innerText += (playerAreaEl.innerText ? " " : "") + word;
+                    btn.disabled = true;
+                    checkAssemble(text);
+                };
+                wordBankEl.appendChild(btn);
+            });
+            
+            // Кнопка сброса
+            let resetBtn = document.createElement('button');
+            resetBtn.innerText = "↺ Сброс";
+            resetBtn.style.backgroundColor = "#95a5a6";
+            resetBtn.style.fontSize = "0.8rem";
+            resetBtn.onclick = loadSentence;
+            wordBankEl.appendChild(document.createElement('br'));
+            wordBankEl.appendChild(resetBtn);
+        }
+        else if (currentMode === 'gaps') {
+            // Режим пропусков (каждое 3-е слово или длинные слова)
+            let words = text.split(' ');
+            let html = "";
+            
+            words.forEach((word, index) => {
+                // Скрываем слова длиннее 3 букв с вероятностью 50%
+                if (word.length > 3 && Math.random() > 0.4) {
+                    html += `<input type="text" data-answer="${word.replace(/[.,!?:;]/g, '')}" 
+                             style="width:${word.length*10}px; border:1px solid #ccc; padding:5px; border-radius:5px; margin:2px;" 
+                             placeholder="?"> `;
+                } else {
+                    html += word + " ";
+                }
+            });
+            
+            playerAreaEl.innerHTML = html;
+            
+            let checkBtn = document.createElement('button');
+            checkBtn.innerText = "Проверить";
+            checkBtn.style.backgroundColor = "#8e44ad";
+            checkBtn.onclick = checkGaps;
+            wordBankEl.appendChild(checkBtn);
+        }
+    }
+
+    function checkAssemble(original) {
+        if (playerAreaEl.innerText === original) {
+            feedbackEl.innerText = "Правильно! 🎉";
+            feedbackEl.className = "feedback correct";
+            playSound(); // Авто озвучка при успехе
+        } else if (playerAreaEl.innerText.length >= original.length) {
+            feedbackEl.innerText = "Ошибка, попробуй еще раз";
+            feedbackEl.className = "feedback wrong";
+        }
+    }
+
+    function checkGaps() {
+        let inputs = playerAreaEl.querySelectorAll('input');
+        let allCorrect = true;
+        
+        inputs.forEach(input => {
+            let val = input.value.trim().toLowerCase();
+            let ans = input.dataset.answer.toLowerCase();
+            // Упрощенная проверка (игнорируем знаки препинания в ответе ребенка)
+            if (val.replace(/[.,!]/g, '') === ans) {
+                input.style.borderColor = "#27ae60";
+                input.style.backgroundColor = "#eafaf1";
+            } else {
+                input.style.borderColor = "#c0392b";
+                input.style.backgroundColor = "#fadbd8";
+                allCorrect = false;
+            }
+        });
+
+        if (allCorrect) {
+            feedbackEl.innerText = "Отлично! Все верно! 🌟";
+            feedbackEl.className = "feedback correct";
+            playSound();
+        } else {
+            feedbackEl.innerText = "Есть ошибки, исправь красные поля";
+            feedbackEl.className = "feedback wrong";
+        }
+    }
+
+    // Старт
+    init();
+</script>
+
+</body>
+</html>
