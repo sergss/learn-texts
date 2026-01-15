@@ -39,9 +39,6 @@
     <h1>🐴 Sivka-Burka</h1>
     <div class="progress">Предложение <span id="currentStep">1</span> из <span id="totalSteps">12</span></div>
     
-    <button onclick="toggleFullText()" class="btn-small" style="background-color: #95a5a6; margin-bottom: 10px;">📜 Показать/Скрыть текст</button>
-    <div id="fullTextContainer" class="full-text-area"></div>
-
     <!-- Canvas Area -->
     <canvas id="sceneCanvas" width="600" height="300" style="background: white; border: 2px solid #333; border-radius: 10px; margin: 20px auto; display: block;"></canvas>
 
@@ -67,6 +64,11 @@
             <button onclick="resetStory()" class="btn-small btn-warning">↺ Сброс текста</button>
         </div>
     </div>
+
+    <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
+    
+    <button onclick="toggleFullText()" class="btn-small" style="background-color: #95a5a6; margin-bottom: 10px;">📜 Показать/Скрыть весь текст</button>
+    <div id="fullTextContainer" class="full-text-area"></div>
 </div>
 
 <script>
