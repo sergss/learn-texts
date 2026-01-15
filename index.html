@@ -57,6 +57,7 @@
         <br><br>
         <button onclick="setMode('assemble')">🧩 Собрать слова</button>
         <button onclick="setMode('gaps')">📝 Вставить пропуски</button>
+        <button onclick="setMode('reveal')">👁️ По слову</button>
         <button onclick="setMode('read')">📖 Просто читать</button>
         
         <div class="admin-controls">
@@ -94,7 +95,8 @@
 
     let story = [];
     let currentIndex = 0;
-    let currentMode = 'read'; // read, assemble, gaps
+    let currentMode = 'read'; // read, assemble, gaps, reveal
+    let revealIndex = 0; // Для режима "по слову"
     const STORAGE_KEY = 'sivka_story_data_v1';
 
     const targetTextEl = document.getElementById('targetText');
@@ -182,38 +184,31 @@
 
         for (let word in keywords) {
             if (lowerText.includes(word)) {
-                // Избегаем дубликатов для синонимов (например ivanushka и he)
-                // Простая эвристика: добавляем объект
                 objectsToDraw.push(keywords[word]);
             }
         }
         
-        // Удаляем дубликаты эмодзи, если они не нужны (например, два раза 🧑)
         objectsToDraw = [...new Set(objectsToDraw)];
         
-        // Если ничего не нашли, рисуем вопросик или абстракцию
         if (objectsToDraw.length === 0) {
             objectsToDraw.push('❓');
         }
 
         // 3. Рисуем объекты
-        // Распределяем их по ширине канваса
         const step = canvas.width / (objectsToDraw.length + 1);
         
-        ctx.font = "100px serif"; // Большой размер для эмодзи
+        ctx.font = "100px serif"; 
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         
         objectsToDraw.forEach((emoji, index) => {
             const x = step * (index + 1);
-            let y = 250; // На земле
+            let y = 250; 
             
-            // Спец. позиция для солнца/луны
             if (emoji === '☀️' || emoji === '🌙') {
-                y = 100; // В небе
+                y = 100;
             }
             
-            // Рисуем цветные эмодзи
             ctx.fillText(emoji, x, y);
         });
     }
@@ -309,7 +304,6 @@
     }
 
     function playSound() {
-        // Сброс очереди для устранения задержек
         speechSynthesis.cancel();
 
         const text = story[currentIndex];
@@ -342,13 +336,9 @@
         feedbackEl.innerText = "";
         const text = story[currentIndex];
         
-        // Рисуем сцену
         drawScene(text);
-        
-        // Обновляем подсветку в полном тексте
         renderFullText(); 
 
-        // Очистка
         wordBankEl.innerHTML = '';
         playerAreaEl.innerHTML = '';
         targetTextEl.style.display = 'none';
@@ -401,6 +391,40 @@
             checkBtn.style.backgroundColor = "#8e44ad";
             checkBtn.onclick = checkGaps;
             wordBankEl.appendChild(checkBtn);
+        }
+        else if (currentMode === 'reveal') {
+            revealIndex = 0;
+            playerAreaEl.innerHTML = '<span style="color:#bdc3c7; font-style:italic;">(Нажми "Показать слово")</span>';
+            
+            let revealBtn = document.createElement('button');
+            revealBtn.innerText = "👁️ Показать слово";
+            revealBtn.style.backgroundColor = "#34495e";
+            revealBtn.onclick = () => revealNextWord(text);
+            
+            let resetBtn = document.createElement('button');
+            resetBtn.innerText = "↺ Сначала";
+            resetBtn.style.backgroundColor = "#95a5a6";
+            resetBtn.onclick = loadSentence;
+
+            wordBankEl.appendChild(revealBtn);
+            wordBankEl.appendChild(resetBtn);
+        }
+    }
+
+    function revealNextWord(originalText) {
+        const words = originalText.split(' ');
+        if (revealIndex < words.length) {
+            if (revealIndex === 0) {
+                playerAreaEl.innerText = ""; // Очистить заглушку
+            }
+            playerAreaEl.innerText += (revealIndex > 0 ? " " : "") + words[revealIndex];
+            revealIndex++;
+            
+            if (revealIndex === words.length) {
+                feedbackEl.innerText = "Прочитано! 🎉";
+                feedbackEl.className = "feedback correct";
+                playSound();
+            }
         }
     }
 
