@@ -2,8 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Easy English</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Sivka-Burka Easy English</title>
     <style>
         :root {
             --bg-teal: #48C9B0;
@@ -729,6 +730,12 @@
     }
 
     init();
+    
+    // Telegram Mini App Init
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand(); // Раскрыть на весь экран
+    }
 </script>
 </body>
 </html>
