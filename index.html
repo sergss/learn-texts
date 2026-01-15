@@ -58,6 +58,7 @@
         <button onclick="setMode('assemble')">🧩 Собрать слова</button>
         <button onclick="setMode('gaps')">📝 Вставить пропуски</button>
         <button onclick="setMode('reveal')">👁️ По слову</button>
+        <button onclick="setMode('letter_by_letter')">🔤 По букве</button>
         <button onclick="setMode('read')">📖 Просто читать</button>
         
         <div class="admin-controls">
@@ -97,6 +98,8 @@
     let currentIndex = 0;
     let currentMode = 'read'; // read, assemble, gaps, reveal
     let revealIndex = 0; // Для режима "по слову"
+    let letterWordIndex = 0;
+    let letterState = 0; // 0: show 1st letter, 1: show full word
     const STORAGE_KEY = 'sivka_story_data_v1';
 
     const targetTextEl = document.getElementById('targetText');
@@ -409,6 +412,24 @@
             wordBankEl.appendChild(revealBtn);
             wordBankEl.appendChild(resetBtn);
         }
+        else if (currentMode === 'letter_by_letter') {
+            letterWordIndex = 0;
+            letterState = 0;
+            playerAreaEl.innerHTML = '<span style="color:#bdc3c7; font-style:italic;">(Нажми "Показать")</span>';
+            
+            let revealBtn = document.createElement('button');
+            revealBtn.innerText = "👁️ Показать";
+            revealBtn.style.backgroundColor = "#34495e";
+            revealBtn.onclick = () => revealNextLetterStep(text);
+            
+            let resetBtn = document.createElement('button');
+            resetBtn.innerText = "↺ Сначала";
+            resetBtn.style.backgroundColor = "#95a5a6";
+            resetBtn.onclick = loadSentence;
+
+            wordBankEl.appendChild(revealBtn);
+            wordBankEl.appendChild(resetBtn);
+        }
     }
 
     function revealNextWord(originalText) {
@@ -426,6 +447,40 @@
                 playSound();
             }
         }
+    }
+
+    function revealNextLetterStep(originalText) {
+        const words = originalText.split(' ');
+        
+        if (letterWordIndex >= words.length) return;
+
+        let displayText = "";
+        
+        // Add fully revealed words
+        for (let i = 0; i < letterWordIndex; i++) {
+            displayText += words[i] + " ";
+        }
+
+        if (letterState === 0) {
+            // Show first letter
+            if (words[letterWordIndex].length > 0) {
+                 displayText += words[letterWordIndex][0]; 
+            }
+            letterState = 1;
+        } else {
+            // Show full word
+            displayText += words[letterWordIndex];
+            letterWordIndex++;
+            letterState = 0;
+            
+            if (letterWordIndex === words.length) {
+                feedbackEl.innerText = "Прочитано! 🎉";
+                feedbackEl.className = "feedback correct";
+                playSound();
+            }
+        }
+        
+        playerAreaEl.innerText = displayText;
     }
 
     function checkAssemble(original) {
