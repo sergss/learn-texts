@@ -295,11 +295,24 @@
     <!-- Bottom / Admin -->
     <div class="full-text-drawer">
         <button onclick="toggleFullText()" class="btn-3d btn-gray" style="font-size: 0.8rem; padding: 8px 15px; width: 100%;">📜 Показать весь текст</button>
-        <div style="margin-top: 10px; text-align: right;">
+        <div style="margin-top: 10px; text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
+            <button onclick="showCustomTextInput()" class="btn-3d btn-blue" style="font-size: 0.8rem; padding: 8px 10px; flex-grow: 1;">➕ Свой текст</button>
             <button onclick="deleteCurrentSentence()" class="btn-3d btn-red" style="font-size: 0.8rem; padding: 8px 10px;">❌</button>
             <button onclick="resetStory()" class="btn-3d btn-yellow" style="font-size: 0.8rem; padding: 8px 10px;">↺</button>
         </div>
         <div id="fullTextContainer" class="full-text-content" style="margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Custom Input Modal -->
+<div id="textInputModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+        <div class="modal-message">Вставьте ваш текст на английском:</div>
+        <textarea id="customTextarea" class="w-100" style="height: 150px; border-radius: 10px; border: 2px solid #BDC3C7; padding: 10px; margin-bottom: 15px; font-family: inherit;" placeholder="Sentence one. Sentence two..."></textarea>
+        <div class="modal-buttons">
+            <button onclick="processCustomText()" class="btn-3d btn-green">Сохранить</button>
+            <button onclick="closeTextInputModal()" class="btn-3d btn-red">Отмена</button>
+        </div>
     </div>
 </div>
 
@@ -441,6 +454,51 @@
 
     function closeModal() {
         modal.style.display = 'none';
+    }
+
+    const textInputModal = document.getElementById('textInputModal');
+    const customTextarea = document.getElementById('customTextarea');
+
+    function showCustomTextInput() {
+        customTextarea.value = "";
+        textInputModal.style.display = 'flex';
+        customTextarea.focus();
+    }
+
+    function closeTextInputModal() {
+        textInputModal.style.display = 'none';
+    }
+
+    function processCustomText() {
+        const rawText = customTextarea.value.trim();
+        if (!rawText) {
+            showAlert("Пожалуйста, введите текст.");
+            return;
+        }
+
+        // Разбивка на предложения. Учитываем . ! ? и сокращения (упрощенно)
+        // Регулярка ищет знаки препинания, за которыми следует пробел или конец строки
+        let sentences = rawText.match(/[^.!?]+[.!?]+/g);
+        
+        if (!sentences) {
+            // Если текст не содержит знаков препинания, считаем его одним предложением
+            sentences = [rawText];
+        } else {
+            sentences = sentences.map(s => s.trim()).filter(s => s.length > 0);
+        }
+
+        if (sentences.length === 0) {
+            showAlert("Не удалось распознать предложения.");
+            return;
+        }
+
+        story = sentences;
+        currentIndex = 0;
+        saveToStorage();
+        closeTextInputModal();
+        loadSentence();
+        renderFullText();
+        showAlert("Текст успешно загружен!");
     }
 
     // --- App Logic ---
